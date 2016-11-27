@@ -1,12 +1,14 @@
-package main
+package icloudgo
 
-import "fmt"
-import "net/http"
-import "github.com/satori/go.uuid"
-import "strings"
-import "encoding/json"
-import "bytes"
-import "io/ioutil"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"github.com/satori/go.uuid"
+	"io/ioutil"
+	"net/http"
+	"strings"
+)
 
 const (
 	BASE_URL  = "https://www.icloud.com"
@@ -35,7 +37,7 @@ type Info struct {
 	} `json:"webservices"`
 }
 
-func login(apple_id, password string) {
+func Login(apple_id, password string) {
 	json_str := `{"apple_id":"` + apple_id + `","password":"` + password +
 		`","extended_login":"false"}`
 	b := []byte(json_str)
@@ -65,7 +67,7 @@ func login(apple_id, password string) {
 	dsid = f.DsInfo.Dsid
 }
 
-func getContacts() {
+func GetContacts() interface{} {
 	client := &http.Client{}
 	url := contactsUrl + "/co/startup" + "?clientBuildNumber=" +
 		clientBuildNumber + "&clientId=" + clientId + "&clientVersion=2.1&" +
@@ -80,10 +82,12 @@ func getContacts() {
 	res, err := client.Do(resp)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
-	
+
 	defer res.Body.Close()
 	respBytes, _ := ioutil.ReadAll(res.Body)
-	fmt.Println(string(respBytes))
+	var f interface{}
+	json.Unmarshal(respBytes, &f)
+	return f
 }
