@@ -12,8 +12,12 @@ import (
 func main() {
 	username := "example@example.com"
 	password := "example"
-	icloudgo.Login(username, password)
-	contacts := icloudgo.GetContacts()
-	fmt.Println(contacts)
+	err := icloudgo.Login(username, password)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+	    contacts := icloudgo.GetContacts()
+	    fmt.Println(contacts)
+	}
 }
 ```

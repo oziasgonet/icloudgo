@@ -3,6 +3,7 @@ package icloudgo
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
@@ -37,7 +38,8 @@ type Info struct {
 	} `json:"webservices"`
 }
 
-func Login(apple_id, password string) {
+// Login to iCloud
+func Login(apple_id, password string) error {
 	json_str := `{"apple_id":"` + apple_id + `","password":"` + password +
 		`","extended_login":"false"}`
 	b := []byte(json_str)
@@ -52,21 +54,37 @@ func Login(apple_id, password string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
-
 	defer resp.Body.Close()
-	reqBytes, _ := ioutil.ReadAll(resp.Body)
-	WEBAUTH_TOKEN = resp.Header["Set-Cookie"][5]
-	WEBAUTH_USER = resp.Header["Set-Cookie"][6]
+	return parseLoginResponse(resp)
+}
+
+// Parses the HTTP response from an iCloud login attempt
+func parseLoginResponse(r *http.Response) error {
+	reqBytes, _ := ioutil.ReadAll(r.Body)
+
+	if len(r.Header["Set-Cookie"]) < 5 {
+		return errors.New("Login failed: Unable to retrieve webauth cookies")
+	}
+	WEBAUTH_TOKEN = r.Header["Set-Cookie"][5]
+	WEBAUTH_USER = r.Header["Set-Cookie"][6]
+
 	var f Info
 	json.Unmarshal(reqBytes, &f)
+
 	contactsUrl = f.Webservices.Contacts.Url
+	if contactsUrl == "" {
+		return errors.New("Login failed: Unable to retrieve contacts url")
+	}
 	// Remove the port from the url
 	contactsUrl = contactsUrl[:len(contactsUrl)-4]
 	dsid = f.DsInfo.Dsid
+
+	return nil
 }
 
+// Retrieve the contacts from iCloud
 func GetContacts() interface{} {
 	client := &http.Client{}
 	url := contactsUrl + "/co/startup" + "?clientBuildNumber=" +
