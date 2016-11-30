@@ -105,7 +105,5 @@ func GetContacts() interface{} {
 
 	defer res.Body.Close()
 	respBytes, _ := ioutil.ReadAll(res.Body)
-	var f interface{}
-	json.Unmarshal(respBytes, &f)
-	return f
+	return respBytes
 }
