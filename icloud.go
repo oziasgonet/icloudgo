@@ -85,7 +85,7 @@ func parseLoginResponse(r *http.Response) error {
 }
 
 // Retrieve the contacts from iCloud
-func GetContacts() interface{} {
+func GetContacts() []byte {
 	client := &http.Client{}
 	url := contactsUrl + "/co/startup" + "?clientBuildNumber=" +
 		clientBuildNumber + "&clientId=" + clientId + "&clientVersion=2.1&" +
