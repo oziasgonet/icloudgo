@@ -14,10 +14,10 @@ func main() {
 	password := "example"
 	err := icloudgo.Login(username, password)
 	if err != nil {
-	    fmt.Println(err)
+		fmt.Println(err)
 	} else {
-	    contacts := icloudgo.GetContacts()
-	    fmt.Println(contacts)
+		contacts := icloudgo.GetContacts()
+		fmt.Println(contacts)
 	}
 }
 ```
